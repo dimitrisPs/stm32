@@ -57,7 +57,7 @@ SRCS      += stm32f1xx_hal_rcc.c stm32f1xx_hal_rcc_ex.c stm32f1xx_hal.c stm32f1x
 
 
 # Directories
-OCD_DIR    = /usr/share/openocd/scripts
+OCD_DIR    = /usr/local/share/openocd/scripts
 
 CUBE_DIR   = ../STM32CubeF1
 
@@ -74,7 +74,9 @@ CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_inter
 ###############################################################################
 # Toolchain
 
-PREFIX     = /opt/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi
+#change it with the output path of whereis arm-none-eabi-gcc  if you have binries in path
+PREFIX     = /opt/gcc-arm-none-eabi-5_3-2016q1/bin/arm-none-eabi
+
 CC         = $(PREFIX)-gcc
 AR         = $(PREFIX)-ar
 OBJCOPY    = $(PREFIX)-objcopy
@@ -101,7 +103,7 @@ INCS      += -I$(BSP_DIR)
 INCS      += -I$(CMSIS_DIR)/Include
 INCS      += -I$(DEV_DIR)/Include
 INCS      += -I$(HAL_DIR)/Inc
-INCS	  += -I/opt/gcc-arm-none-eabi-5_2-2015q4/arm-none-eabi/include
+INCS	  += -I/opt/gcc-arm-none-eabi-5_3-2016q1/arm-none-eabi/include
 
 # Library search paths
 LIBS       = -L$(CMSIS_DIR)/Lib
@@ -151,7 +153,7 @@ Release/obj/%.o : %.c | dirs
 	@echo "[CC]      $(notdir $<)"
 	$Q$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF Release/dep/$(*F).d
 
-Release/%.elf: $(OBJS)
+Release/$(TARGET).elf: $(OBJS)
 	@echo "[LD]      $(TARGET).elf"
 	$Q$(CC) $(CFLAGS) $(LDFLAGS) src/startup_stm32f103xb.s $^ -o $@
 	@echo "[OBJDUMP] $(TARGET).lst"
