@@ -97,7 +97,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
     /*for tx pin we need to set the output amplfire in push pull mode
      *rx pin in input mode and enable the internal pull up
      */
-    GPIOInitStruct.Pin=GPIO_PIN_9|GPIO_PIN_10;
+    GPIOInitStruct.Pin=GPIO_PIN_9;
     GPIOInitStruct.Mode=GPIO_MODE_AF_PP;
     GPIOInitStruct.Pull=GPIO_PULLUP;
     GPIOInitStruct.Speed=GPIO_SPEED_FREQ_HIGH;

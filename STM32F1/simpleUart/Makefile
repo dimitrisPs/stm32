@@ -33,7 +33,7 @@ TARGET     = demo
 BOARD      = STM32F103C8T6_BLUE
 EXMP_BOARD = STM32F103RB-Nucleo
 
-OCDFLAGS   = -f ../miscFiles/stm32f103c8t6_blue.cfg
+#OCDFLAGS   = -f board/stm32f4discovery.cfg
 GDBFLAGS   =
 
 #EXAMPLE   = Templates
@@ -57,9 +57,9 @@ SRCS      += stm32f1xx_hal_rcc.c stm32f1xx_hal_rcc_ex.c stm32f1xx_hal.c stm32f1x
 
 
 # Directories
-OCD_SCRIPT_DIR    = ../miscFiles
+OCD_DIR    = /usr/local/share/openocd/scripts
 
-CUBE_DIR   = /home/dimitris/programming/STM32F1/STM32CubeF1
+CUBE_DIR   = ../STM32CubeF1
 
 HAL_DIR    = $(CUBE_DIR)/Drivers/STM32F1xx_HAL_Driver
 CMSIS_DIR  = $(CUBE_DIR)/Drivers/CMSIS
@@ -74,7 +74,9 @@ CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_inter
 ###############################################################################
 # Toolchain
 
-PREFIX     = /opt/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi
+#change it with the output path of whereis arm-none-eabi-gcc  if you have binries in path
+PREFIX     = /opt/gcc-arm-none-eabi-5_3-2016q1/bin/arm-none-eabi
+
 CC         = $(PREFIX)-gcc
 AR         = $(PREFIX)-ar
 OBJCOPY    = $(PREFIX)-objcopy
@@ -101,18 +103,15 @@ INCS      += -I$(BSP_DIR)
 INCS      += -I$(CMSIS_DIR)/Include
 INCS      += -I$(DEV_DIR)/Include
 INCS      += -I$(HAL_DIR)/Inc
-INCS      += -I$(HAL_DIR)/Inc/Legacy
-INCS	  += -I/opt/gcc-arm-none-eabi-5_2-2015q4/arm-none-eabi/include
+INCS	  += -I/opt/gcc-arm-none-eabi-5_3-2016q1/arm-none-eabi/include
 
 # Library search paths
 LIBS       = -L$(CMSIS_DIR)/Lib
 
-# Compiler flags. Please note that current flags do not provide any code optimization
-# but are suitable for debugging purpose. if you want any code optimization you can
-# change -Og flag in the following line (e.g. -O1 , -O2, -O3)
-CFLAGS     = -Wall -g -std=gnu11 -Og -fmessage-length=0
+# Compiler flags
+CFLAGS     = -Wall -g -std=gnu11 -Os
 CFLAGS    += -mlittle-endian -mcpu=cortex-m3 -mthumb
-CFLAGS    += -ffunction-sections -fdata-sections -fsigned-char -ffreestanding -fno-move-loop-invariants
+CFLAGS    += -ffunction-sections -fdata-sections
 CFLAGS    += $(INCS) $(DEFS)
 
 # Linker flags
@@ -154,7 +153,7 @@ Release/obj/%.o : %.c | dirs
 	@echo "[CC]      $(notdir $<)"
 	$Q$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF Release/dep/$(*F).d
 
-Release/%.elf: $(OBJS)
+Release/$(TARGET).elf: $(OBJS)
 	@echo "[LD]      $(TARGET).elf"
 	$Q$(CC) $(CFLAGS) $(LDFLAGS) src/startup_stm32f103xb.s $^ -o $@
 	@echo "[OBJDUMP] $(TARGET).lst"
@@ -169,7 +168,7 @@ Release/%.elf: $(OBJS)
 	$(OBJCOPY) -O ihex $^ $@
 
 openocd:
-	$(OCD) $(OCDFLAGS)
+	$(OCD) -s $(OCD_DIR) $(OCDFLAGS)
 
 program: all
 	$(OCD) -s $(OCD_DIR) $(OCDFLAGS) -c "program $(TARGET).elf verify reset"
