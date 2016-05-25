@@ -117,6 +117,21 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 }
 void HAL_SPI_MspInit()
 {
+    GPIO_InitTypeDef spiPin;
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_SPI1_CLK_ENABLE();
+
+    //PA4 nss
+    //PA5 sck
+    //PA6 miso
+    //PA& mosi
+
+    spiPin.Mode=GPIO_MODE_AF_PP;
+    spiPin.Pull=GPIO_PULLDOWN;
+    spiPin.Speed= GPIO_SPEED_FREQ_HIGH;
+    spiPin.Pin=GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+
+    HAL_GPIO_Init(GPIOA,&spiPin);
 
 }
 void HAL_SPI_MspDeinit()
