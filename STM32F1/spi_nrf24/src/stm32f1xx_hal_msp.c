@@ -115,7 +115,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 
 
 }
-void HAL_SPI_MspInit()
+void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
     GPIO_InitTypeDef spiPin;
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -134,7 +134,7 @@ void HAL_SPI_MspInit()
     HAL_GPIO_Init(GPIOA,&spiPin);
 
 }
-void HAL_SPI_MspDeinit()
+void HAL_SPI_MspDeinit(SPI_HandleTypeDef *hspi)
 {
 
 }

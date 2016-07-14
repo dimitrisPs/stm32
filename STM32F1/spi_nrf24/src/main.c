@@ -2,17 +2,25 @@
 
 
 const uint8_t aTxBuffer[] = "this is a sample programm    \n";
+uint8_t aRxBuffer[40];
 
 int main(void)
 {
     UART_HandleTypeDef uart={0};
+    SPI_HandleTypeDef spi1={0};
     HAL_Init();
     SystemClock_Config();
     initLed();
+    HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
     initUart(&uart);
+    initSpi(&spi1);
+
+
+    nrf24_init(&spi1, GPIOA, GPIO_PIN_4);
+
     while(1)
     {
-        HAL_UART_Transmit(&uart,aTxBuffer,30,10);
+        nrf24_getStatus();
     }
 
 }
@@ -24,15 +32,19 @@ void SystemClock_Config(void)
 
     /* Configure PLL ------------------------------------------------------*/
 
-    oscinitstruct.OscillatorType  = RCC_OSCILLATORTYPE_HSI;
-    oscinitstruct.HSEState        = RCC_HSE_OFF;
+    oscinitstruct.OscillatorType  = RCC_OSCILLATORTYPE_HSE;
+    oscinitstruct.HSEState        = RCC_HSE_ON;
     oscinitstruct.LSEState        = RCC_LSE_OFF;
-    oscinitstruct.HSIState        = RCC_HSI_ON;
+    oscinitstruct.HSIState        = RCC_HSI_OFF;
     oscinitstruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     oscinitstruct.HSEPredivValue    = RCC_HSE_PREDIV_DIV1;
+
+    //set clock to 72 MHz (rated). with 8MHz external crystal and pll multiplier
+    // 9 thw system is clocked at 8*9=72 MHz
     oscinitstruct.PLL.PLLState    = RCC_PLL_ON;
-    oscinitstruct.PLL.PLLSource   = RCC_PLLSOURCE_HSI_DIV2;
-    oscinitstruct.PLL.PLLMUL      = RCC_PLL_MUL16;
+    oscinitstruct.PLL.PLLSource   = RCC_PLLSOURCE_HSE;
+    oscinitstruct.PLL.PLLMUL      = RCC_PLL_MUL9;
+
     if (HAL_RCC_OscConfig(&oscinitstruct)!= HAL_OK)
     {
         /* Initialization Error */
@@ -45,7 +57,7 @@ void SystemClock_Config(void)
     clkinitstruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     clkinitstruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     clkinitstruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    clkinitstruct.APB1CLKDivider = RCC_HCLK_DIV4;
     if (HAL_RCC_ClockConfig(&clkinitstruct, FLASH_LATENCY_2)!= HAL_OK)
     {
         /* Initialization Error */
@@ -73,6 +85,31 @@ void initUart(UART_HandleTypeDef *uartTD)
             HAL_Delay(20000);
         }
     }
+}
+void initSpi(SPI_HandleTypeDef *spiTD)
+{
+    GPIO_InitTypeDef nrf24CsPin;
+
+    nrf24CsPin.Pin=GPIO_PIN_4; //same as nss of spi1 (pa1)
+    nrf24CsPin.Mode=GPIO_MODE_OUTPUT_PP;
+    nrf24CsPin.Pull=GPIO_PULLUP;
+    nrf24CsPin.Speed=GPIO_SPEED_FREQ_LOW;
+
+    spiTD->Instance=SPI1;
+    spiTD->Init.CLKPhase=SPI_PHASE_1EDGE;
+    spiTD->Init.CLKPolarity=SPI_POLARITY_LOW;
+    spiTD->Init.CRCCalculation=SPI_CRCCALCULATION_DISABLE;
+    spiTD->Init.Mode=SPI_MODE_MASTER;
+    spiTD->Init.NSS=SPI_NSS_SOFT;
+    spiTD->Init.FirstBit=SPI_FIRSTBIT_MSB;
+    spiTD->Init.DataSize=SPI_DATASIZE_8BIT;
+    spiTD->Init.Direction=SPI_DIRECTION_2LINES;
+    spiTD->Init.BaudRatePrescaler=SPI_BAUDRATEPRESCALER_8;//achiving >=10Mhz? for nrf24
+    if (HAL_SPI_Init(spiTD)!=HAL_OK)
+    {
+        while(1);
+    }
+    HAL_GPIO_Init(GPIOA,&nrf24CsPin);
 }
 
 void initLed()
