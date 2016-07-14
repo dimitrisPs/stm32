@@ -1,0 +1,21 @@
+# Compiler output
+*.o
+*.a
+
+*.elf
+*.hex
+*.lst
+*.map
+*.zip
+*.pdf
+*.gch
+
+# Third-Party firmware from ST
+stm32CubeF4/
+
+#compile directories
+*/Release/dep
+
+#atom files
+.clang_complete
+*.json
