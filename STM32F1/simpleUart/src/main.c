@@ -19,7 +19,7 @@ int main(void)
         while(1);
     }
 
-    while (1)
+    while (1) 
     {
         HAL_UART_Transmit(&uart1, aTxBuffer,40, 10);
     }

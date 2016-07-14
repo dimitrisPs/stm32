@@ -27,7 +27,7 @@
 #
 
 # A name common to all output files (elf, map, hex, bin, lst)
-TARGET     = demo
+TARGET     = $(notdir $(shell pwd))
 
 # Take a look into $(CUBE_DIR)/Drivers/BSP for available BSPs
 BOARD      = STM32F103C8T6_BLUE
@@ -75,7 +75,7 @@ CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_inter
 # Toolchain
 
 #change it with the output path of whereis arm-none-eabi-gcc  if you have binries in path
-PREFIX     = /opt/gcc-arm-none-eabi-5_3-2016q1/bin/arm-none-eabi
+PREFIX     = /opt/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi
 
 CC         = $(PREFIX)-gcc
 AR         = $(PREFIX)-ar
