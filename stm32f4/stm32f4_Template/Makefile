@@ -1,5 +1,5 @@
 # A modified version of Steffen Vogel's make file.
-# this version is meant to work with stm32f4_discovery board.
+# this version is meant to work with STM32F103C8T6 generic blue boards.
 # i have not implement the openocd function yet, however, one can flash the board
 # with make flash command. You can find the original version at
 # https://github.com/stv0g/stm32cube-gcc.
@@ -64,13 +64,15 @@ CUBE_URL   = http://www.st.com/st-web-ui/static/active/en/st_prod_software_inter
 SRCS       = main.c
 SRCS      += system_$(MCU_FAMILY).c
 SRCS      += stm32f4xx_it.c
-SRCS      += stm32f4xx_hal_msp.c
+# SRCS      += stm32f4xx_hal_msp.c
+# SRCS      += buffer_cir_c.c
 
 
 
 # #####################    Basic HAL libraries  ##############################
 
 # uncomment all the .c files you need for your project from the list below
+# SRCS      += stm32f4_discovery.c
 
 SRCS      += stm32f4xx_hal.c
 # SRCS      += stm32f4xx_hal_adc.c
@@ -96,7 +98,7 @@ SRCS      += stm32f4xx_hal_dma.c
 # SRCS      += stm32f4xx_hal_flash_ramfunc.c
 # SRCS      += stm32f4xx_hal_fmpi2c.c
 # SRCS      += stm32f4xx_hal_fmpi2c_ex.c
-# SRCS      += stm32f4xx_hal_gpio.c
+SRCS      += stm32f4xx_hal_gpio.c
 # SRCS      += stm32f4xx_hal_hash.c
 # SRCS      += stm32f4xx_hal_hash_ex.c
 # SRCS      += stm32f4xx_hal_hcd.c
@@ -135,7 +137,7 @@ SRCS      += stm32f4xx_hal_rcc.c
 # SRCS      += stm32f4xx_hal_timebase_rtc_wakeup_template.c
 # SRCS      += stm32f4xx_hal_timebase_tim_template.c
 # SRCS      += stm32f4xx_hal_tim_ex.c
-# SRCS      += stm32f4xx_hal_uart.c
+SRCS      += stm32f4xx_hal_uart.c
 # SRCS      += stm32f4xx_hal_usart.c
 # SRCS      += stm32f4xx_hal_wwdg.c
 # SRCS      += stm32f4xx_ll_fmc.c
@@ -166,7 +168,8 @@ OCD        = openocd
 # Options
 
 # Defines
-DEFS       = -D$(MCU) -DUSE_HAL_DRIVER -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER
+DEFS       = -D$(MCU) -DUSE_HAL_DRIVER -DHSE_VALUE=8000000
+# -DUSE_STDPERIPH_DRIVER
 
 
 
@@ -175,23 +178,25 @@ DEFS       += -DUSE_DBPRINTF
 
 # Include search paths (-I)
 INCS       = -IInclude
+INCS      += -I$(HAL_DIR)/Inc
+INCS      += -I$(HAL_DIR)/Legacy/Inc
 INCS      += -I$(BSP_DIR)
 INCS      += -I$(CMSIS_DIR)/Include
 INCS      += -I$(DEV_DIR)/Include
-INCS      += -I$(HAL_DIR)/Inc
+
 INCS	  += -I$(GCC_DIR)/arm-none-eabi/include
 
 # Library search paths
 LIBS       = -L$(CMSIS_DIR)/Lib
 
 # Compiler flags
-CFLAGS     = -Wall -g -std=gnu11 -Os
-CFLAGS    += -mlittle-endian -mcpu=cortex-m3 -mthumb
+CFLAGS     = -Wall -g -std=gnu11 -Og
+CFLAGS    += -mlittle-endian -mcpu=cortex-m4 -mthumb
 CFLAGS    += -ffunction-sections -fdata-sections
 CFLAGS    += $(INCS) $(DEFS)
 
 # Linker flags
-LDFLAGS    = -Wl,--gc-sections -Wl,-Map=Release/$(TARGET).map $(LIBS) -T$(MCU)_FLASH.ld
+LDFLAGS    = -Wl,--gc-sections -Wl,-Map=Release/$(TARGET).map $(LIBS) -TSTM32F407VGTx_FLASH.ld
 
 # Enable Semihosting
 LDFLAGS   += --specs=rdimon.specs -lc -lrdimon
@@ -231,7 +236,7 @@ Release/obj/%.o : %.c | dirs
 
 Release/$(TARGET).elf: $(OBJS)
 	@echo "[LD]      $(TARGET).elf"
-	$Q$(CC) $(CFLAGS) $(LDFLAGS) src/startup_$(MCU_FAMILY).s $^ -o $@
+	$Q$(CC) $(CFLAGS) $(LDFLAGS) src/startup_stm32f407xx.s $^ -o $@
 	@echo "[OBJDUMP] $(TARGET).lst"
 	$Q$(OBJDUMP) -St Release/$(TARGET).elf >Release/$(TARGET).lst
 	@echo "[SIZE]    $(TARGET).elf"
@@ -279,4 +284,4 @@ template: $(CUBE_DIR) src Include
 	# cp -i ../$(MCU)_FLASH.ld $(MCU)_FLASH.ld
 
 clean:
-	@echo "[RMDIR]   Release"          ; rm -fr Release
+	@echo "[RMDIR]   dep"          ; rm -fr Release
